@@ -1,0 +1,130 @@
+---
+title: "Nearly neutral theory"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(reshape2)
+library(grid)
+library(ggthemes)
+# The palette with gray:
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+# The palette with black:
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+theme_Presentation <- function(base_size=14, base_family="Helvetica") {
+  (theme_foundation(base_size=base_size, base_family=base_family)+
+     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+           panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+    theme(text = element_text(size = 50))+
+    theme(axis.line = element_line(colour = 'black', linewidth = 4))+
+    theme(plot.margin = margin(t = 20,  # Top margin
+                             r = 20,  # Right margin
+                             b = 20,  # Bottom margin
+                             l = 20)) # Left margin
+    )
+}
+```
+
+```{r, echo=FALSE}
+# Set parameters, x_real = 0
+E_i = 100
+i_max = 200
+i = 1:i_max
+deltad = 0.001
+
+x_real = 0
+x_segfree = x_real + 4.9*sqrt(E_i) - E_i
+E_x = x_real + 4.9*sqrt(E_i)
+# Create a data frame with values of x and their corresponding dpois values
+data <- data.frame(
+  x = x_real + 4.9*sqrt(E_i) - E_i + i,
+  probability = dpois(x = i, lambda = E_i)
+)
+death_rate = ifelse(data$x<0, deltad, deltad*data$x)
+
+data <- cbind(data, death_rate)
+```
+
+```{r, echo=FALSE}
+# Plot the distribution on genotype space
+p_dist <- ggplot(data, aes(x = x, y = probability)) +
+  geom_line(linewidth=4)+
+  geom_vline(xintercept = E_x, linetype='dashed', 
+                color = cbbPalette[4], linewidth=3)+
+  theme_Presentation()+
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank())
+  
+p_dist
+png(paste0("graphs/Genotype_distribution_E_x_xreal", x_real, ".png"), width=600, height=350)
+p_dist
+dev.off()
+
+p_dist2 <- ggplot(data, aes(x = x, y = probability)) +
+  geom_line(linewidth=4)+
+  geom_vline(xintercept = E_x, linetype='dashed', 
+                color = cbbPalette[4], linewidth=3)+
+  geom_vline(xintercept = x_real, linetype='dashed', 
+                color = cbbPalette[2], linewidth=3)+
+  geom_vline(xintercept = x_segfree, linetype='dashed', 
+                color = cbbPalette[3], linewidth=3)+
+  theme_Presentation()+
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank())
+  
+p_dist2
+png(paste0("graphs/Genotype_distribution_xreal", x_real, ".png"), width=600, height=350)
+p_dist2
+dev.off()
+```
+```{r, echo=FALSE}
+# Plot death rate
+p_deathrate <- ggplot(data, aes(x = x, y = death_rate)) +
+  geom_line(linewidth=4)+ 
+  ylab("Death rate")+
+  geom_vline(xintercept = E_x, linetype='dashed', 
+                color = cbbPalette[4], linewidth=3)+
+  geom_vline(xintercept = x_real, linetype='dashed', 
+                color = cbbPalette[2], linewidth=3)+
+  geom_vline(xintercept = x_segfree, linetype='dashed', 
+                color = cbbPalette[3], linewidth=3)+
+  theme_Presentation()
+p_deathrate
+png(paste0("graphs/Deathrate_xreal", x_real, ".png"), width=600, height=350)
+p_deathrate
+dev.off()
+```
+
+
+```{r, echo=FALSE}
+# Set parameters ----
+x_real_t2 = 50
+x_segfree_t2 = x_real_t2 + 4.9*sqrt(E_i) - E_i
+E_x_t2 = x_real_t2 + 4.9*sqrt(E_i)
+# Create a data frame with values of x and their corresponding dpois values
+data_t2 <- data.frame(
+  x = x_real_t2 + 4.9*sqrt(E_i) - E_i + i,
+  probability = dpois(x = i, lambda = E_i)
+)
+death_rate_t2 = ifelse(data_t2$x<0, deltad, deltad*data_t2$x)
+
+data <- cbind(data_t2, death_rate_t2)
+```
+
+```{r, echo=FALSE}
+# Plot the distribution on genotype space
+p_dist_t2 <- ggplot(data_t2, aes(x = x, y = probability)) +
+  geom_line(linewidth=4)+
+  geom_vline(xintercept = E_x_t2, linetype='dashed', 
+                color = cbbPalette[4], linewidth=3)+
+  theme_Presentation()+
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line.y = element_blank())
+  
+p_dist_t2
+png(paste0("graphs/Genotype_distribution_E_x_xreal", x_real_t2, ".png"), width=600, height=350)
+p_dist_t2
+dev.off()
+```

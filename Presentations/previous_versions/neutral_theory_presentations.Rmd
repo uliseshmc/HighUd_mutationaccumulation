@@ -1,0 +1,43 @@
+---
+title: "Nearly neutral theory"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(reshape2)
+# The palette with gray:
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+# The palette with black:
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+```{r, echo=FALSE}
+# Set parameters ----
+N = c(100, 1000, 10000)
+s = -seq(from = 0.00001, to = 0.1, by = 0.0001)
+x = expand.grid(N = N, s = s)
+
+Ns = x$N*x$s
+x <- cbind(x, Ns)
+
+Pfix = ifelse(x$Ns != 0, (1-exp(-2*x$Ns/x$N))/(1- exp(-4*x$Ns)), 1/(2*x$N))
+Pfix_neutral = 1/(2*x$N)
+Pfix_over_Pfixneutral = Pfix/Pfix_neutral
+
+x <- cbind(x, Pfix, Pfix_neutral, Pfix_over_Pfixneutral)
+```
+
+```{r, echo=FALSE}
+datatoplot <- subset(x, select = c(s, Pfix_over_Pfixneutral, Pfix, N))
+p_Pfix_over_Pfixneutral <- ggplot(datatoplot, aes(x = log10(-s), y = log10(Pfix_over_Pfixneutral), color = as.factor(N))) +
+                    geom_line() +
+                    labs(x = "log10(s)", y = "log10(Probability of Fixation)", color = "Population size") +
+                    scale_colour_manual(values=cbbPalette) +
+                    theme(text = element_text(size = 20)) +
+                    ylim(-100, 1)
+p_Pfix_over_Pfixneutral
+```
